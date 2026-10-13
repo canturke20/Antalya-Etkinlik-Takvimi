@@ -1,0 +1,140 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Antalya Etkinlik Takvimi//TR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:🌴 Antalya Etkinlikleri (Canlı)
+X-WR-TIMEZONE:Europe/Istanbul
+BEGIN:VEVENT
+UID:ant-kar-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261020T100000
+DTEND:20261020T173000
+SUMMARY:[Kariyer & Öğrenci] Akdeniz Kariyer Zirvesi '26
+LOCATION:Akdeniz Üniversitesi Atatürk Konferans Salonu, Konyaaltı, Antalya
+DESCRIPTION:50+ kurumsal şirketin İK yöneticileri ile mülakat simülasyonları ve staj fırsatları.\n\nKategori: Kariyer & Öğrenci\nMekan: Akdeniz Üniversitesi Atatürk Konferans Salonu\nFiyat: Ücretsiz (Kayıt Zorunlu)\nLink: https://kariyer.akdeniz.edu.tr
+URL:https://kariyer.akdeniz.edu.tr
+CATEGORIES:Kariyer & Öğrenci
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-tek-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261022T183000
+DTEND:20261022T210000
+SUMMARY:[Teknoloji & Girişimcilik] Antalya Tech & AI Meetup: Yapay Zeka ile Ürün Geliştirme
+LOCATION:Antalya Teknokent Ar-Ge Binası, Konyaaltı, Antalya
+DESCRIPTION:Yazılımcılar ve girişimciler için networking buluşması ve sunumlar.\n\nKategori: Teknoloji & Girişimcilik\nMekan: Antalya Teknokent Ar-Ge Binası\nFiyat: Ücretsiz\nLink: https://meetup.com/antalya-tech
+URL:https://meetup.com/antalya-tech
+CATEGORIES:Teknoloji & Girişimcilik
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-sir-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261024T093000
+DTEND:20261025T180000
+SUMMARY:[Şirket & İş Zirveleri] Uluslararası Turizm & Otelcilik Yatırımları Kongresi
+LOCATION:ANFAŞ Fuar Merkezi, Aksu, Antalya
+DESCRIPTION:Bölgesel B2B yatırım ve iş ortaklığı zirvesi.\n\nKategori: Şirket & İş Zirveleri\nMekan: ANFAŞ Fuar Merkezi\nFiyat: Kurumsal Kayıt\nLink: https://anfas.com.tr
+URL:https://anfas.com.tr
+CATEGORIES:Şirket & İş Zirveleri
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-par-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261024T210000
+DTEND:20261025T030000
+SUMMARY:[Parti & Gece Hayatı] Kaleiçi Rooftop Sunset & Electronic Music
+LOCATION:Kaleiçi Secret Garden, Muratpaşa, Antalya
+DESCRIPTION:Gün batımı sonrası yerli ve yabancı DJ performansları.\n\nKategori: Parti & Gece Hayatı\nMekan: Kaleiçi Secret Garden\nFiyat: 350 TL\nLink: https://biletino.com
+URL:https://biletino.com
+CATEGORIES:Parti & Gece Hayatı
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-kon-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261023T203000
+DTEND:20261023T223000
+SUMMARY:[Konser] Antalya Devlet Senfoni Orkestrası - Film Müzikleri Konseri
+LOCATION:AKM Aspendos Salonu, Muratpaşa, Antalya
+DESCRIPTION:Klasik sinema başyapıtlarının müzikleri canlı orkestra yorumuyla.\n\nKategori: Konser\nMekan: AKM Aspendos Salonu\nFiyat: 150 TL - 350 TL\nLink: https://biletinial.com
+URL:https://biletinial.com
+CATEGORIES:Konser
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-tiy-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261026T203000
+DTEND:20261026T224500
+SUMMARY:[Tiyatro] Açık Hava Tiyatrosu: Zengin Mutfağı
+LOCATION:Konyaaltı Açıkhava Tiyatrosu, Konyaaltı, Antalya
+DESCRIPTION:Şener Şen ve usta oyuncu kadrosuyla tiyatro akşamı.\n\nKategori: Tiyatro\nMekan: Konyaaltı Açıkhava Tiyatrosu\nFiyat: 400 TL - 800 TL\nLink: https://biletix.com
+URL:https://biletix.com
+CATEGORIES:Tiyatro
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-std-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261027T203000
+DTEND:20261027T223000
+SUMMARY:[Stand-Up & Komedi] Kaan Sekban Saçmalar Stand-Up
+LOCATION:Türkan Şoray Kültür Merkezi, Muratpaşa, Antalya
+DESCRIPTION:Tek kişilik komedi gösterisi.\n\nKategori: Stand-Up & Komedi\nMekan: Türkan Şoray Kültür Merkezi\nFiyat: 350 TL - 650 TL\nLink: https://bubilet.com.tr
+URL:https://bubilet.com.tr
+CATEGORIES:Stand-Up & Komedi
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-atl-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261028T140000
+DTEND:20261028T170000
+SUMMARY:[Atölye & Workshop] Seramik ve Kupa Yapım Atölyesi
+LOCATION:Antalya Sanat Çiftliği, Muratpaşa, Antalya
+DESCRIPTION:Çamur şekillendirme ve seramik teknikleri çalışması.\n\nKategori: Atölye & Workshop\nMekan: Antalya Sanat Çiftliği\nFiyat: 450 TL\nLink: https://biletinial.com
+URL:https://biletinial.com
+CATEGORIES:Atölye & Workshop
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-dog-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261101T090000
+DTEND:20261101T160000
+SUMMARY:[Doğa & Spor] Geyikbayırı Tırmanış & Doğa Yürüyüşü
+LOCATION:Geyikbayırı Kamp Alanı, Konyaaltı, Antalya
+DESCRIPTION:Başlangıç tırmanışları ve Likya Yolu patika yürüyüşü.\n\nKategori: Doğa & Spor\nMekan: Geyikbayırı Kamp Alanı\nFiyat: Ücretsiz\nLink: https://meetup.com/antalya-outdoor
+URL:https://meetup.com/antalya-outdoor
+CATEGORIES:Doğa & Spor
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-gas-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261106T110000
+DTEND:20261108T190000
+SUMMARY:[Sergi & Gastronomi] GastroAntalya Lezzet & Narenciye Tadım Günleri
+LOCATION:Cam Piramit, Muratpaşa, Antalya
+DESCRIPTION:Yerel lezzetler ve narenciye atölyeleri.\n\nKategori: Sergi & Gastronomi\nMekan: Cam Piramit\nFiyat: Giriş Serbest\nLink: https://antalya.bel.tr
+URL:https://antalya.bel.tr
+CATEGORIES:Sergi & Gastronomi
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-sos-01@antalya-etkinlikler.local
+DTSTAMP:20261013T142105Z
+DTSTART:20261021T193000
+DTEND:20261021T230000
+SUMMARY:[Sosyal Kulüpler & Buluşmalar] Antalya Language Exchange & Board Games
+LOCATION:Old Town Pub Kaleiçi, Muratpaşa, Antalya
+DESCRIPTION:Yabancı dil pratik akşamı ve masa oyunları.\n\nKategori: Sosyal Kulüpler & Buluşmalar\nMekan: Old Town Pub Kaleiçi\nFiyat: Ücretsiz\nLink: https://meetup.com
+URL:https://meetup.com
+CATEGORIES:Sosyal Kulüpler & Buluşmalar
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
