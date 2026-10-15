@@ -1,0 +1,41 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Antalya Etkinlik Takvimi//TR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:🌴 Antalya Etkinlikleri (Canlı)
+X-WR-TIMEZONE:Europe/Istanbul
+BEGIN:VEVENT
+UID:ant-kar-canli@antalya-canli
+DTSTAMP:20261015T170508Z
+DTSTART:20261022T100000
+DTEND:20261022T160000
+SUMMARY:[Kariyer & Öğrenci] Akdeniz Üniversitesi Kariyer & Mülakat Günleri
+LOCATION:Akdeniz Üniversitesi Kampüsü, Antalya
+DESCRIPTION:Öğrenciler ve mezunlar için şirketlerle networking ve staj görüşmeleri.\n\nKategori: Kariyer & Öğrenci\nMekan: Akdeniz Üniversitesi Kampüsü\nBilet/Link: https://www.akdeniz.edu.tr
+URL:https://www.akdeniz.edu.tr
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-tek-canli@antalya-canli
+DTSTAMP:20261015T170508Z
+DTSTART:20261024T140000
+DTEND:20261024T170000
+SUMMARY:[Teknoloji & Girişimcilik] Antalya Yazılım & Teknoloji Topluluğu Buluşması
+LOCATION:Antalya Teknokent Ar-Ge Salonu, Antalya
+DESCRIPTION:Girişimciler ve yazılım geliştiriciler için açık oturum ve atölye.\n\nKategori: Teknoloji & Girişimcilik\nMekan: Antalya Teknokent Ar-Ge Salonu\nBilet/Link: https://antalyateknokent.com.tr
+URL:https://antalyateknokent.com.tr
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:ant-parti-canli@antalya-canli
+DTSTAMP:20261015T170508Z
+DTSTART:20261024T213000
+DTEND:20261025T020000
+SUMMARY:[Parti & Gece Hayatı] Kaleiçi Weekend DJ Performance & Sunset Session
+LOCATION:Kaleiçi Sahneleri, Antalya
+DESCRIPTION:Kaleiçi'nde hafta sonu elektronik müzik ve DJ gecesi.\n\nKategori: Parti & Gece Hayatı\nMekan: Kaleiçi Sahneleri\nBilet/Link: https://biletino.com
+URL:https://biletino.com
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
