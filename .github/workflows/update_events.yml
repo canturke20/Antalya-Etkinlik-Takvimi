@@ -2,9 +2,8 @@ name: Gunluk Antalya Etkinlik Guncellemesi
 
 on:
   schedule:
-    # Her sabah 06:00'da (TSİ) kendi kendine çalışır
     - cron: '0 3 * * *'
-  workflow_dispatch: # İstediğin zaman elle de tetikleyebilirsin
+  workflow_dispatch:
 
 jobs:
   update-calendar:
@@ -13,11 +12,11 @@ jobs:
       contents: write
 
     steps:
-      - name: Depoyu Klonla
+      - name: Depoyu Al
         uses: actions/checkout@v4
 
-      - name: Python Kur
-        uses: setup-python@v5
+      - name: Python Ortamini Kur
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -27,9 +26,9 @@ jobs:
       - name: Etkinlikleri Guncelle
         run: python scraper.py
 
-      - name: Takvimi Kaydet ve Push Et
+      - name: Takvim Dosyalarini Kaydet
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add events.json antalya_etkinlikler.ics index.html
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Antalya etkinlikleri güncellendi" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Antalya etkinlikleri otomatik güncellendi" && git push)
