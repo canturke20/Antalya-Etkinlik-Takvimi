@@ -5,48 +5,4 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:🌴 Antalya Etkinlikleri
 X-WR-TIMEZONE:Europe/Istanbul
-BEGIN:VEVENT
-UID:hub-akm@antalya-canli
-DTSTAMP:20261109T163141Z
-DTSTART:20261109T200000
-DTEND:20261109T220000
-SUMMARY:[Konser & Sahne] Antalya Atatürk Kültür Merkezi (AKM) Güncel Sahne Takvimi
-LOCATION:AKM Aspendos & Perge Salonu, Antalya
-DESCRIPTION:Antalya Büyükşehir Belediyesi AKM Aspendos ve Perge salonlarında sahnelenen tüm haftalık tiyatro, konser ve bale programı.\n\nResmi Sayfa / Bilet: https://antalya.bel.tr/Hizmetler/Kultur-Sanat-Etkinlikleri
-URL:https://antalya.bel.tr/Hizmetler/Kultur-Sanat-Etkinlikleri
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:hub-biletix@antalya-canli
-DTSTAMP:20261109T163141Z
-DTSTART:20261109T203000
-DTEND:20261109T230000
-SUMMARY:[Konser & Sahne] Biletix Antalya Tüm Konser ve Stand-Up Listesi
-LOCATION:Antalya Açıkhava & Türkan Şoray KM, Antalya
-DESCRIPTION:Antalya'da şu an aktif satışta olan tüm güncel biletix etkinlikleri ve doğrudan bilet alma sayfası.\n\nResmi Sayfa / Bilet: https://www.biletix.com/search/TURKIYE/tr#!city_sb:Antalya
-URL:https://www.biletix.com/search/TURKIYE/tr#!city_sb:Antalya
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:hub-bubilet@antalya-canli
-DTSTAMP:20261109T163141Z
-DTSTART:20261109T200000
-DTEND:20261109T223000
-SUMMARY:[Tiyatro] Bubilet Antalya İndirimli Etkinlik Biletleri
-LOCATION:Antalya Sahneleri, Antalya
-DESCRIPTION:Antalya bölgesindeki tüm indirimli tiyatro, stand-up ve konser bilet listesi.\n\nResmi Sayfa / Bilet: https://www.bubilet.com.tr/antalya
-URL:https://www.bubilet.com.tr/antalya
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:hub-passo@antalya-canli
-DTSTAMP:20261109T163141Z
-DTSTART:20261109T190000
-DTEND:20261109T210000
-SUMMARY:[Spor] Passo Antalya Etkinlik & Antalyaspor Maç Biletleri
-LOCATION:Corendon Airlines Park Antalya, Antalya
-DESCRIPTION:Antalyaspor Süper Lig maçları ve Antalya sahne gösterileri.\n\nResmi Sayfa / Bilet: https://www.passo.com.tr/tr/etkinlikler/antalya
-URL:https://www.passo.com.tr/tr/etkinlikler/antalya
-STATUS:CONFIRMED
-END:VEVENT
 END:VCALENDAR
