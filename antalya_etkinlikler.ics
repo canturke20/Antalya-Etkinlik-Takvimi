@@ -1,8 +1,8 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Antalya Etkinlik Takvimi//TR
+PRODID:-//Antalya Etkinlik Firsatlari//TR
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:🌴 Antalya Etkinlikleri
+X-WR-CALNAME:🌴 Bubilet Fırsatları
 X-WR-TIMEZONE:Europe/Istanbul
 END:VCALENDAR
