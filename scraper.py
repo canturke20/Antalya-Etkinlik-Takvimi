@@ -1,75 +1,89 @@
-import os
 import json
 import re
-import urllib.request
 from datetime import datetime
+from playwright.sync_api import sync_playwright
 
-def fetch_bubilet_links():
+def fetch_bubilet_playwright():
     events = []
-    
-    # 1. Bubilet'in sayfasından linkleri kaba kuvvetle (Regex ile) çekmeyi deniyoruz
-    try:
-        url = "https://www.bubilet.com.tr/antalya"
-        # Bot gibi değil, standart bir Windows bilgisayar gibi kapıyı çalıyoruz
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-        html = urllib.request.urlopen(req, timeout=10).read().decode('utf-8')
+    print("Gerçek tarayıcı (Chrome) başlatılıyor...")
+
+    with sync_playwright() as p:
+        # Arka planda başsız (görünmez) bir tarayıcı aç
+        browser = p.chromium.launch(headless=True)
+        # Cloudflare'in bot olduğumuzu anlamaması için normal bir bilgisayar kimliği veriyoruz
+        page = browser.new_page(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        )
         
-        # Sadece etkinlik linklerini bul (/antalya/etkinlik/... ile başlayanlar)
-        links = re.findall(r'href="(/antalya/etkinlik/[^"]+)"', html)
-        links = list(set(links)) # Aynı linkleri teke düşür
-        
-        for link in links[:15]:
-            full_url = "https://www.bubilet.com.tr" + link
-            # Linkin içindeki yazıdan başlığı otomatik oluştur (Örn: cem-adrian-konseri -> Cem Adrian Konseri)
-            raw_title = link.split('/')[-1]
-            raw_title = raw_title.replace('-antalya', '').replace('-oyunu', '').replace('-', ' ').title()
+        try:
+            print("Bubilet Antalya sayfasına gidiliyor ve Cloudflare aşılıyor...")
+            # Siteye git ve tüm JavaScript/Cloudflare engellerinin yüklenip bitmesini bekle
+            page.goto("https://www.bubilet.com.tr/antalya", timeout=60000, wait_until="networkidle")
             
-            events.append({
-                "title": raw_title,
-                "url": full_url
-            })
-    except Exception as e:
-        print(f"Bağlantı engellendi, yedek listeye geçiliyor: {e}")
-
-    # 2. HİÇBİR ŞEKİLDE BOŞ KALMAMASI İÇİN YEDEK LİSTE (Gerçek Bubilet Linkleri)
-    # Eğer Cloudflare duvarı tamamen kapatırsa, panelin asla boş kalmayacak ve bu linkleri gösterecek.
-    if len(events) == 0:
-        events = [
-            {"title": "Cem Adrian Konseri", "url": "https://www.bubilet.com.tr/antalya/etkinlik/cem-adrian-konseri"},
-            {"title": "Doğu Demirkol Stand Up", "url": "https://www.bubilet.com.tr/antalya/etkinlik/dogu-demirkol-stand-up"},
-            {"title": "Zengin Mutfağı Tiyatro", "url": "https://www.bubilet.com.tr/antalya/etkinlik/zengin-mutfagi"},
-            {"title": "Karanlıkta Komedi", "url": "https://www.bubilet.com.tr/antalya/etkinlik/karanlikta-komedi"},
-            {"title": "Baturay Özdemir Stand Up", "url": "https://www.bubilet.com.tr/antalya/etkinlik/baturay-ozdemir-stand-up"}
-        ]
-
-    # 3. Yazıları Tarayıp Senin İstediğin Şablonda Sınıflandırma
-    final_events = []
-    for idx, ev in enumerate(events):
-        t_lower = ev['title'].lower()
-        category = "Konser & Sahne"
-        
-        if "stand up" in t_lower or "komedi" in t_lower or "demirkol" in t_lower or "baturay" in t_lower:
-            category = "Stand-Up & Komedi"
-        elif "tiyatro" in t_lower or "oyun" in t_lower or "mutfağı" in t_lower:
-            category = "Tiyatro"
-        elif "parti" in t_lower or "festival" in t_lower:
-            category = "Parti & Festival"
-
-        final_events.append({
-            "id": f"bubilet-{idx}",
-            "title": ev['title'],
-            "category": category,
-            "venue": "Antalya",
-            "district": "Antalya",
-            "start": datetime.now().strftime("%Y-%m-%dT20:00:00"),
-            "end": datetime.now().strftime("%Y-%m-%dT22:30:00"),
-            "price": "Bilet Sayfasına Git",
-            "ticket_url": ev['url'],
-            "description": f"{ev['title']} etkinlik detayları ve fırsatları için aşağıdaki butona tıklayın.",
-            "source": "Bubilet"
-        })
-        
-    return final_events
+            # Sayfa tamamen yüklendi, artık HTML içindeki tüm linkleri alabiliriz
+            link_elements = page.query_selector_all("a[href]")
+            seen_titles = set()
+            
+            for el in link_elements:
+                href = el.get_attribute("href") or ""
+                
+                # Sadece etkinlik linklerini filtrele, gereksiz iletişim/sepet sayfalarını atla
+                href_lower = href.lower()
+                is_event_link = ("/antalya/" in href_lower or "/etkinlik/" in href_lower)
+                is_junk = any(x in href_lower for x in ["hakkimizda", "iletisim", "kvkk", "giris", "sepet", "uye-ol", "kategori", "mekan", "sss"])
+                
+                if len(href.split("/")) < 4:
+                    is_event_link = False
+                    
+                if is_event_link and not is_junk:
+                    full_url = href if href.startswith("http") else "https://www.bubilet.com.tr" + href
+                    
+                    # Başlığı al
+                    title = el.get_attribute("title") or ""
+                    if not title:
+                        title = el.inner_text().strip()
+                        
+                    title = re.sub(r'\s+', ' ', title).strip()
+                    if len(title) < 6 or "Bilet Al" in title or "İncele" in title:
+                        continue
+                        
+                    # Aynı etkinliği bir daha ekleme
+                    clean_t = re.sub(r'[^a-zA-Z0-9]', '', title.lower())
+                    if clean_t in seen_titles:
+                        continue
+                    seen_titles.add(clean_t)
+                    
+                    # SENİN İSTEDİĞİN ŞABLON: Kelimelere göre kategoriye ayırma
+                    category = "Konser & Sahne"
+                    tl = title.lower()
+                    if any(x in tl for x in ["stand up", "komedi", "baturay", "demirkol", "gösteri", "talk"]):
+                        category = "Stand-Up & Komedi"
+                    elif any(x in tl for x in ["tiyatro", "oyun", "meyhanesi", "kumpanya", "müzikali"]):
+                        category = "Tiyatro"
+                    elif any(x in tl for x in ["parti", "festival", "party", "90'lar", "dj"]):
+                        category = "Parti & Festival"
+                    elif any(x in tl for x in ["atölye", "workshop", "eğitim"]):
+                        category = "Atölye & Eğitim"
+                        
+                    events.append({
+                        "id": f"bubilet-{len(events)}",
+                        "title": title,
+                        "category": category,
+                        "venue": "Antalya",
+                        "district": "Antalya",
+                        "start": datetime.now().strftime("%Y-%m-%dT20:00:00"),
+                        "end": datetime.now().strftime("%Y-%m-%dT22:30:00"),
+                        "price": "Fırsatı İncele",
+                        "ticket_url": full_url,
+                        "description": f"Fırsat: {title}. Etkinlik detayları ve bilet sayfasına gitmek için yandaki butona tıklayın.",
+                        "source": "Bubilet"
+                    })
+        except Exception as e:
+            print(f"Tarayıcı hatası: {e}")
+        finally:
+            browser.close()
+            
+    return events
 
 def generate_ics(events, output_path="antalya_etkinlikler.ics"):
     lines = [
@@ -104,11 +118,11 @@ def generate_ics(events, output_path="antalya_etkinlikler.ics"):
         f.write("\r\n".join(lines))
 
 def main():
-    events = fetch_bubilet_links()
+    events = fetch_bubilet_playwright()
+    print(f"Başarılı: Toplam {len(events)} gerçek etkinlik tarayıcı ile yakalandı.")
     with open("events.json", "w", encoding="utf-8") as f:
         json.dump(events, f, ensure_ascii=False, indent=2)
     generate_ics(events)
-    print(f"İşlem Tamam! {len(events)} etkinlik json dosyasına yazıldı.")
 
 if __name__ == "__main__":
     main()
