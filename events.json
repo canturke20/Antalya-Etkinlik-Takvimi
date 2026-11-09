@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": "hub-akm",
+    "title": "Antalya Atatürk Kültür Merkezi (AKM) Güncel Sahne Takvimi",
+    "category": "Konser & Sahne",
+    "venue": "AKM Aspendos & Perge Salonu",
+    "district": "Muratpaşa",
+    "start": "2026-11-09T20:00:00",
+    "end": "2026-11-09T22:00:00",
+    "price": "Resmi Gişe & Online",
+    "ticket_url": "https://antalya.bel.tr/Hizmetler/Kultur-Sanat-Etkinlikleri",
+    "description": "Antalya Büyükşehir Belediyesi AKM Aspendos ve Perge salonlarında sahnelenen tüm haftalık tiyatro, konser ve bale programı.",
+    "source": "Antalya BB"
+  },
+  {
+    "id": "hub-biletix",
+    "title": "Biletix Antalya Tüm Konser ve Stand-Up Listesi",
+    "category": "Konser & Sahne",
+    "venue": "Antalya Açıkhava & Türkan Şoray KM",
+    "district": "Muratpaşa / Konyaaltı",
+    "start": "2026-11-09T20:30:00",
+    "end": "2026-11-09T23:00:00",
+    "price": "Biletix Satışta",
+    "ticket_url": "https://www.biletix.com/search/TURKIYE/tr#!city_sb:Antalya",
+    "description": "Antalya'da şu an aktif satışta olan tüm güncel biletix etkinlikleri ve doğrudan bilet alma sayfası.",
+    "source": "Biletix"
+  },
+  {
+    "id": "hub-bubilet",
+    "title": "Bubilet Antalya İndirimli Etkinlik Biletleri",
+    "category": "Tiyatro",
+    "venue": "Antalya Sahneleri",
+    "district": "Muratpaşa",
+    "start": "2026-11-09T20:00:00",
+    "end": "2026-11-09T22:30:00",
+    "price": "İndirimli Bilet",
+    "ticket_url": "https://www.bubilet.com.tr/antalya",
+    "description": "Antalya bölgesindeki tüm indirimli tiyatro, stand-up ve konser bilet listesi.",
+    "source": "Bubilet"
+  },
+  {
+    "id": "hub-passo",
+    "title": "Passo Antalya Etkinlik & Antalyaspor Maç Biletleri",
+    "category": "Spor",
+    "venue": "Corendon Airlines Park Antalya",
+    "district": "Muratpaşa",
+    "start": "2026-11-09T19:00:00",
+    "end": "2026-11-09T21:00:00",
+    "price": "Passo Satışta",
+    "ticket_url": "https://www.passo.com.tr/tr/etkinlikler/antalya",
+    "description": "Antalyaspor Süper Lig maçları ve Antalya sahne gösterileri.",
+    "source": "Passo"
+  }
+]
