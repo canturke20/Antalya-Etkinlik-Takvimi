@@ -1,118 +1,116 @@
 import os
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-# Bot olarak algılanmamak için gerçek bir tarayıcı kimliği kullanıyoruz
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
-}
-
 def fetch_bubilet():
     events = []
-    print("Bubilet Antalya sayfası taranıyor...")
+    print("Bubilet güvenlik duvarı aşılıyor (Proxy ile)...")
     
-    url = "https://www.bubilet.com.tr/antalya"
+    # GitHub'ın Amerika IP'sini gizlemek ve bot engelini aşmak için proxy servisi kullanıyoruz
+    url = "https://api.allorigins.win/get?url=https://www.bubilet.com.tr/antalya"
     
     try:
-        response = requests.get(url, headers=HEADERS, timeout=15)
-        soup = BeautifulSoup(response.text, "html.parser")
+        response = requests.get(url, timeout=20)
+        data = response.json()
+        html_content = data.get("contents", "")
         
-        # Sitedeki tüm potansiyel bilet/etkinlik linklerini bul (Sonu 'bileti' veya 'konseri' ile bitenler vs.)
-        # Bubilet'te etkinlik detay linkleri genellikle bu formattadır
-        event_links = soup.find_all("a", href=True)
-        
+        soup = BeautifulSoup(html_content, "html.parser")
+        links = soup.find_all("a", href=True)
         seen_titles = set()
         
-        for idx, link_tag in enumerate(event_links):
-            href = link_tag['href']
+        for tag in links:
+            href = tag['href']
             
-            # Linkin bir etkinlik sayfası olup olmadığını kontrol et
-            if "/antalya/" in href and href != "/antalya":
+            # Etkinlik linklerini ayırt etme (Gereksiz menü ve iletişim sayfalarını çöpe at)
+            href_lower = href.lower()
+            is_event_link = ("/antalya/" in href_lower or "/etkinlik/" in href_lower)
+            is_junk = any(x in href_lower for x in ["hakkimizda", "iletisim", "kvkk", "giris", "sepet", "uye-ol", "kategori", "mekan", "sss"])
+            
+            # Sadece /antalya ana sayfa linkiyse atla
+            if len(href.split("/")) < 4:
+                is_event_link = False
+            
+            if is_event_link and not is_junk:
+                full_url = href if href.startswith("http") else "https://www.bubilet.com.tr" + href
                 
-                # Etkinlik başlığını linkin içindeki metinden veya 'title' özelliğinden al
-                title = link_tag.get_text(strip=True)
+                # 1. Aşama: Başlığı ve Fırsat Yazısını Kazı
+                title = ""
+                if tag.get("title"):
+                    title = tag.get("title")
+                
                 if not title:
-                    title = link_tag.get('title', '').strip()
+                    header = tag.find(["h2", "h3", "h4", "h5", "strong"])
+                    if header:
+                        title = header.get_text(strip=True)
                 
-                # Başlık çok kısaysa (örn. sadece "Bilet Al" yazıyorsa) atla
-                if len(title) < 5:
+                if not title:
+                    img = tag.find("img")
+                    if img and img.get("alt"):
+                        title = img.get("alt")
+                
+                if not title:
+                    title = tag.get_text(strip=True)
+                    
+                # Yazıyı temizle ve kısa başlıklı buton metinlerini atla
+                title = re.sub(r'\s+', ' ', title).strip()
+                if len(title) < 6 or "Bilet Al" in title or "İncele" in title:
                     continue
                     
-                # Aynı etkinliği iki kere eklememek için kontrol
-                clean_title = re.sub(r'[^a-zA-Z0-9]', '', title.lower())
-                if clean_title in seen_titles:
+                # Aynı fırsatı listeye 2 kez eklememek için filtrele
+                clean_t = re.sub(r'[^a-zA-Z0-9]', '', title.lower())
+                if clean_t in seen_titles:
                     continue
-                seen_titles.add(clean_title)
-
-                # Tam URL'yi oluştur
-                full_url = href if href.startswith("http") else "https://www.bubilet.com.tr" + href
-
-                # YAZILARI TARAYARAK SINIFLANDIRMA (KATEGORİZASYON)
-                title_lower = title.lower()
-                category = "Konser & Sahne" # Varsayılan kategori
+                seen_titles.add(clean_t)
                 
-                if "stand up" in title_lower or "komedi" in title_lower or "baturay" in title_lower or "doğu demirkol" in title_lower:
+                # 2. Aşama: Yazıların İçindeki Kelimelere Göre Kategoriye Ayır (Senin İstediğin Şablon)
+                category = "Konser & Sahne"
+                tl = title.lower()
+                if any(x in tl for x in ["stand up", "komedi", "baturay", "demirkol", "gösteri", "talk"]):
                     category = "Stand-Up & Komedi"
-                elif "tiyatro" in title_lower or "oyun" in title_lower or "meyhanesi" in title_lower:
+                elif any(x in tl for x in ["tiyatro", "oyun", "meyhanesi", "kumpanya", "müzikali"]):
                     category = "Tiyatro"
-                elif "parti" in title_lower or "festival" in title_lower or "90'lar" in title_lower:
+                elif any(x in tl for x in ["parti", "festival", "party", "90'lar", "dj"]):
                     category = "Parti & Festival"
-                elif "atölye" in title_lower or "workshop" in title_lower:
+                elif any(x in tl for x in ["atölye", "workshop", "eğitim"]):
                     category = "Atölye & Eğitim"
-
-                # Mekan tespiti (Bubilet'te başlığın içinde veya linkin yanında geçebilir, şimdilik Antalya Sahneleri)
-                venue = "Antalya Sahneleri (Detaylar linkte)"
-                if "Açıkhava" in title:
-                    venue = "Antalya Açıkhava"
-                elif "Türkan Şoray" in title:
-                    venue = "Türkan Şoray Kültür Merkezi"
-                elif "AKM" in title:
-                    venue = "Antalya AKM"
-
-                # Örnek Tarih (Gerçek tarih sayfa içine girildiğinde yazar, listelemede genel tarih atıyoruz)
-                start_date = datetime.now().strftime("%Y-%m-%dT20:00:00")
-                end_date = datetime.now().strftime("%Y-%m-%dT22:30:00")
-
+                    
                 events.append({
-                    "id": f"bubilet-{idx}",
+                    "id": f"bubilet-{len(events)}",
                     "title": title,
                     "category": category,
-                    "venue": venue,
+                    "venue": "Antalya (Detaylar Linkte)",
                     "district": "Antalya",
-                    "start": start_date,
-                    "end": end_date,
-                    "price": "Bilet Fiyatlarını Gör",
+                    "start": datetime.now().strftime("%Y-%m-%dT20:00:00"),
+                    "end": datetime.now().strftime("%Y-%m-%dT22:30:00"),
+                    "price": "Fırsatı İncele",
                     "ticket_url": full_url,
-                    "description": f"{title} etkinliği hakkında daha fazla bilgi, saatler ve bilet satın alma ekranı için aşağıdaki butona tıklayın.",
+                    "description": f"Fırsat: {title}. Sayfaya gidip detayları okumak ve bilet almak için yandaki butona tıkla.",
                     "source": "Bubilet"
                 })
                 
     except Exception as e:
-        print(f"Bubilet kazıma sırasında hata: {e}")
+        print(f"Veri çekme hatası: {e}")
         
     return events
 
 def generate_ics(events, output_path="antalya_etkinlikler.ics"):
-    # Apple Takvim için ICS dosyası oluşturma fonksiyonu
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Antalya Etkinlik Takvimi//TR",
+        "PRODID:-//Antalya Etkinlik Firsatlari//TR",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:🌴 Antalya Etkinlikleri",
+        "X-WR-CALNAME:🌴 Bubilet Fırsatları",
         "X-WR-TIMEZONE:Europe/Istanbul"
     ]
     now_stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
     for ev in events:
         s_dt = ev["start"].replace("-", "").replace(":", "")
         e_dt = ev["end"].replace("-", "").replace(":", "")
-        desc = f"{ev['description']}\\n\\nBilet Linki: {ev['ticket_url']}"
+        desc = f"{ev['description']}\\n\\nSayfaya Git: {ev['ticket_url']}"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{ev['id']}@antalya-canli",
@@ -131,17 +129,11 @@ def generate_ics(events, output_path="antalya_etkinlikler.ics"):
         f.write("\r\n".join(lines))
 
 def main():
-    # Sadece Bubilet verilerini çekiyoruz
-    all_events = fetch_bubilet()
-    
-    print(f"İşlem Tamamlandı: Toplam {len(all_events)} adet etkinlik Bubilet'ten başarıyla çekildi.")
-
-    # 1. HTML panelin için JSON veritabanını kaydet
+    events = fetch_bubilet()
+    print(f"Başarılı: Toplam {len(events)} gerçek etkinlik yakalandı.")
     with open("events.json", "w", encoding="utf-8") as f:
-        json.dump(all_events, f, ensure_ascii=False, indent=2)
-
-    # 2. Telefonun için Apple Takvim dosyasını kaydet
-    generate_ics(all_events)
+        json.dump(events, f, ensure_ascii=False, indent=2)
+    generate_ics(events)
 
 if __name__ == "__main__":
     main()
