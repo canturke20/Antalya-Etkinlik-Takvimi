@@ -1,143 +1,104 @@
 import os
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 
+# Bot olarak algılanmamak için gerçek bir tarayıcı kimliği kullanıyoruz
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
-def fetch_biletinial_antalya():
-    """Biletinial Antalya listesinden gerçek etkinlikleri çeker."""
+def fetch_bubilet():
     events = []
-    url = "https://biletinial.com/tr-tr/etkinlikler/antalya"
+    print("Bubilet Antalya sayfası taranıyor...")
+    
+    url = "https://www.bubilet.com.tr/antalya"
+    
     try:
-        res = requests.get(url, headers=HEADERS, timeout=15)
-        if res.status_code == 200:
-            soup = BeautifulSoup(res.text, "html.parser")
-            cards = soup.select("div.event-card, .event-list-item, li.eventItem, .movie-card")
+        response = requests.get(url, headers=HEADERS, timeout=15)
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Sitedeki tüm potansiyel bilet/etkinlik linklerini bul (Sonu 'bileti' veya 'konseri' ile bitenler vs.)
+        # Bubilet'te etkinlik detay linkleri genellikle bu formattadır
+        event_links = soup.find_all("a", href=True)
+        
+        seen_titles = set()
+        
+        for idx, link_tag in enumerate(event_links):
+            href = link_tag['href']
             
-            # Alternatif kart seçicileri
-            if not cards:
-                cards = soup.find_all("a", href=re.compile(r"/tr-tr/(tiyatro|muzik|stand-up|etkinlik)/"))
-            
-            for idx, card in enumerate(cards[:25]):
-                # Eğer link kartın kendisiyse
-                if card.name == "a":
-                    link = card.get("href", "")
-                    title = card.get_text(strip=True)
-                else:
-                    link_elem = card.select_one("a[href]")
-                    title_elem = card.select_one("h3, h2, .name, .title")
-                    link = link_elem["href"] if link_elem else ""
-                    title = title_elem.get_text(strip=True) if title_elem else ""
-
-                if not title or len(title) < 3 or not link:
+            # Linkin bir etkinlik sayfası olup olmadığını kontrol et
+            if "/antalya/" in href and href != "/antalya":
+                
+                # Etkinlik başlığını linkin içindeki metinden veya 'title' özelliğinden al
+                title = link_tag.get_text(strip=True)
+                if not title:
+                    title = link_tag.get('title', '').strip()
+                
+                # Başlık çok kısaysa (örn. sadece "Bilet Al" yazıyorsa) atla
+                if len(title) < 5:
                     continue
+                    
+                # Aynı etkinliği iki kere eklememek için kontrol
+                clean_title = re.sub(r'[^a-zA-Z0-9]', '', title.lower())
+                if clean_title in seen_titles:
+                    continue
+                seen_titles.add(clean_title)
 
-                if not link.startswith("http"):
-                    link = "https://biletinial.com" + link
+                # Tam URL'yi oluştur
+                full_url = href if href.startswith("http") else "https://www.bubilet.com.tr" + href
 
-                # Kategori tespiti
-                cat = "Konser & Sahne"
-                t_lower = (title + " " + link).lower()
-                if "stand-up" in t_lower or "komedi" in t_lower:
-                    cat = "Stand-Up & Komedi"
-                elif "tiyatro" in t_lower or "oyun" in t_lower:
-                    cat = "Tiyatro"
-                elif "opera" in t_lower or "bale" in t_lower:
-                    cat = "Opera & Bale"
+                # YAZILARI TARAYARAK SINIFLANDIRMA (KATEGORİZASYON)
+                title_lower = title.lower()
+                category = "Konser & Sahne" # Varsayılan kategori
+                
+                if "stand up" in title_lower or "komedi" in title_lower or "baturay" in title_lower or "doğu demirkol" in title_lower:
+                    category = "Stand-Up & Komedi"
+                elif "tiyatro" in title_lower or "oyun" in title_lower or "meyhanesi" in title_lower:
+                    category = "Tiyatro"
+                elif "parti" in title_lower or "festival" in title_lower or "90'lar" in title_lower:
+                    category = "Parti & Festival"
+                elif "atölye" in title_lower or "workshop" in title_lower:
+                    category = "Atölye & Eğitim"
+
+                # Mekan tespiti (Bubilet'te başlığın içinde veya linkin yanında geçebilir, şimdilik Antalya Sahneleri)
+                venue = "Antalya Sahneleri (Detaylar linkte)"
+                if "Açıkhava" in title:
+                    venue = "Antalya Açıkhava"
+                elif "Türkan Şoray" in title:
+                    venue = "Türkan Şoray Kültür Merkezi"
+                elif "AKM" in title:
+                    venue = "Antalya AKM"
+
+                # Örnek Tarih (Gerçek tarih sayfa içine girildiğinde yazar, listelemede genel tarih atıyoruz)
+                start_date = datetime.now().strftime("%Y-%m-%dT20:00:00")
+                end_date = datetime.now().strftime("%Y-%m-%dT22:30:00")
 
                 events.append({
-                    "id": f"biletinial-{idx}",
-                    "title": title[:70].strip(),
-                    "category": cat,
-                    "venue": "Antalya",
-                    "district": "Muratpaşa / Konyaaltı",
-                    "start": datetime.now().strftime("%Y-%m-%dT20:30:00"),
-                    "end": datetime.now().strftime("%Y-%m-%dT22:30:00"),
-                    "price": "Bilet Sayfasında",
-                    "ticket_url": link,
-                    "description": f"{title} - Biletler ve etkinlik seansları için bağlantıya gidin.",
-                    "source": "Biletinial"
+                    "id": f"bubilet-{idx}",
+                    "title": title,
+                    "category": category,
+                    "venue": venue,
+                    "district": "Antalya",
+                    "start": start_date,
+                    "end": end_date,
+                    "price": "Bilet Fiyatlarını Gör",
+                    "ticket_url": full_url,
+                    "description": f"{title} etkinliği hakkında daha fazla bilgi, saatler ve bilet satın alma ekranı için aşağıdaki butona tıklayın.",
+                    "source": "Bubilet"
                 })
+                
     except Exception as e:
-        print(f"Biletinial tarama hatası: {e}")
+        print(f"Bubilet kazıma sırasında hata: {e}")
+        
     return events
 
-def fetch_events_from_sources():
-    all_events = []
-    
-    # 1. Biletinial canlı tarama
-    biletinial_events = fetch_biletinial_antalya()
-    all_events.extend(biletinial_events)
-
-    # 2. Canlı taramada bot engeli olursa listenin ASLA boş kalmaması için 
-    # doğrudan Antalya'daki resmi güncel biletleme/etkinlik sayfalarına yönlendiren doğrulanmış merkezler:
-    if len(all_events) < 3:
-        verified_hub = [
-            {
-                "id": "hub-akm",
-                "title": "Antalya Atatürk Kültür Merkezi (AKM) Güncel Sahne Takvimi",
-                "category": "Konser & Sahne",
-                "venue": "AKM Aspendos & Perge Salonu",
-                "district": "Muratpaşa",
-                "start": datetime.now().strftime("%Y-%m-%dT20:00:00"),
-                "end": datetime.now().strftime("%Y-%m-%dT22:00:00"),
-                "price": "Resmi Gişe & Online",
-                "ticket_url": "https://antalya.bel.tr/Hizmetler/Kultur-Sanat-Etkinlikleri",
-                "description": "Antalya Büyükşehir Belediyesi AKM Aspendos ve Perge salonlarında sahnelenen tüm haftalık tiyatro, konser ve bale programı.",
-                "source": "Antalya BB"
-            },
-            {
-                "id": "hub-biletix",
-                "title": "Biletix Antalya Tüm Konser ve Stand-Up Listesi",
-                "category": "Konser & Sahne",
-                "venue": "Antalya Açıkhava & Türkan Şoray KM",
-                "district": "Muratpaşa / Konyaaltı",
-                "start": datetime.now().strftime("%Y-%m-%dT20:30:00"),
-                "end": datetime.now().strftime("%Y-%m-%dT23:00:00"),
-                "price": "Biletix Satışta",
-                "ticket_url": "https://www.biletix.com/search/TURKIYE/tr#!city_sb:Antalya",
-                "description": "Antalya'da şu an aktif satışta olan tüm güncel biletix etkinlikleri ve doğrudan bilet alma sayfası.",
-                "source": "Biletix"
-            },
-            {
-                "id": "hub-bubilet",
-                "title": "Bubilet Antalya İndirimli Etkinlik Biletleri",
-                "category": "Tiyatro",
-                "venue": "Antalya Sahneleri",
-                "district": "Muratpaşa",
-                "start": datetime.now().strftime("%Y-%m-%dT20:00:00"),
-                "end": datetime.now().strftime("%Y-%m-%dT22:30:00"),
-                "price": "İndirimli Bilet",
-                "ticket_url": "https://www.bubilet.com.tr/antalya",
-                "description": "Antalya bölgesindeki tüm indirimli tiyatro, stand-up ve konser bilet listesi.",
-                "source": "Bubilet"
-            },
-            {
-                "id": "hub-passo",
-                "title": "Passo Antalya Etkinlik & Antalyaspor Maç Biletleri",
-                "category": "Spor",
-                "venue": "Corendon Airlines Park Antalya",
-                "district": "Muratpaşa",
-                "start": datetime.now().strftime("%Y-%m-%dT19:00:00"),
-                "end": datetime.now().strftime("%Y-%m-%dT21:00:00"),
-                "price": "Passo Satışta",
-                "ticket_url": "https://www.passo.com.tr/tr/etkinlikler/antalya",
-                "description": "Antalyaspor Süper Lig maçları ve Antalya sahne gösterileri.",
-                "source": "Passo"
-            }
-        ]
-        all_events.extend(verified_hub)
-
-    return all_events
-
 def generate_ics(events, output_path="antalya_etkinlikler.ics"):
+    # Apple Takvim için ICS dosyası oluşturma fonksiyonu
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -151,7 +112,7 @@ def generate_ics(events, output_path="antalya_etkinlikler.ics"):
     for ev in events:
         s_dt = ev["start"].replace("-", "").replace(":", "")
         e_dt = ev["end"].replace("-", "").replace(":", "")
-        desc = f"{ev['description']}\\n\\nResmi Sayfa / Bilet: {ev['ticket_url']}"
+        desc = f"{ev['description']}\\n\\nBilet Linki: {ev['ticket_url']}"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{ev['id']}@antalya-canli",
@@ -170,11 +131,17 @@ def generate_ics(events, output_path="antalya_etkinlikler.ics"):
         f.write("\r\n".join(lines))
 
 def main():
-    evs = fetch_events_from_sources()
-    print(f"Toplam {len(evs)} adet etkinlik işlendi.")
+    # Sadece Bubilet verilerini çekiyoruz
+    all_events = fetch_bubilet()
+    
+    print(f"İşlem Tamamlandı: Toplam {len(all_events)} adet etkinlik Bubilet'ten başarıyla çekildi.")
+
+    # 1. HTML panelin için JSON veritabanını kaydet
     with open("events.json", "w", encoding="utf-8") as f:
-        json.dump(evs, f, ensure_ascii=False, indent=2)
-    generate_ics(evs)
+        json.dump(all_events, f, ensure_ascii=False, indent=2)
+
+    # 2. Telefonun için Apple Takvim dosyasını kaydet
+    generate_ics(all_events)
 
 if __name__ == "__main__":
     main()
